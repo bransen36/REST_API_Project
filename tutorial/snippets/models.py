@@ -38,12 +38,11 @@ class Snippet(models.Model):
 
 class Task(models.Model):
     title = models.CharField(max_length=100, blank=False)
-    description = models.CharField(blank=True)
+    description = models.CharField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
     is_complete = models.BooleanField(blank=False)
-    due_date = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
-    updated_at = models.DateTimeField(blank=True)
-
-    def save(self, *args, **kwargs):
-        
+    due_date = models.DateTimeField(blank=True, null=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    owner = models.ForeignKey('auth.User', related_name='tasks', on_delete=models.CASCADE)
 

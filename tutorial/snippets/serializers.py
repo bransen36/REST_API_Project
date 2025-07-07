@@ -1,20 +1,29 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
+from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES, Task
 
-class SnippetSerializer(serializers.ModelSerializer):
+class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
 
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'code', 'linenos', 'language', 'style', 'owner']
+        fields = ['id', 'title', 'code', 'linenos', 'language', 'style', 'owner', 'highlight']
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+    tasks = serializers.PrimaryKeyRelatedField(many=True, queryset=Task.objects.all())
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'snippets']
+        fields = ['id', 'username', 'snippets', 'tasks']
+
+class TaskSerializer(serializers.HyperlinkedModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'created_at', 'is_complete', 'due_date', 'completed_at', 'updated_at', 'owner']
 
     ### This is how you would generally implement create() and update() methods for a model serializer if not using serializers.ModelSerializer
 
