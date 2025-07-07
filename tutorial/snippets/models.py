@@ -36,3 +36,14 @@ class Snippet(models.Model):
         self.highlighted = highlight(self.code, lexer, formatter)
         super().save(*args, **kwargs)
 
+class Task(models.Model):
+    title = models.CharField(max_length=100, blank=False)
+    description = models.CharField(blank=True)
+    is_complete = models.BooleanField(blank=False)
+    due_date = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    updated_at = models.DateTimeField(blank=True)
+
+    def save(self, *args, **kwargs):
+        
+
