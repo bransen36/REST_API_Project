@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES, Task
+from django.utils import timezone
 
 class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -18,8 +19,28 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = ['id', 'username', 'snippets', 'tasks']
 
+class RegisterSerializer(serializers.HyperlinkedModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
+        return user
+
+
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
+    def not_in_past(value):
+        if value < timezone.now():
+            raise serializers.ValidationError('The timestamp for the update is in the past')
+        
     owner = serializers.ReadOnlyField(source='owner.username')
+    updated_at = serializers.DateTimeField(validators=[not_in_past])
     
     class Meta:
         model = Task
